@@ -1,4 +1,4 @@
-CREATE TABLE products (
+CREATE TABLE paradedb.products (
     id SERIAL PRIMARY KEY,
     description TEXT,
     rating INTEGER CHECK (
@@ -9,13 +9,13 @@ CREATE TABLE products (
 );
 
 INSERT INTO
-    products (description, rating, category)
+    paradedb.products (description, rating, category)
 VALUES
     ('Ergonomic metal keyboard', 4, 'Electronics'),
     ('Plastic Keyboard', 4, 'Electronics'),
     ('Sleek running shoes', 5, 'Footwear'),
-    ('Durable wooden chair', 3, 'Furniture'),
-    ('Natural skin lotion', 4, 'Beauty'),
+    ('White jogging shoes', 3, 'Footwear'),
+    ('Generic shoes', 4, 'Footwear'),
     ('Compact digital camera', 5, 'Photography'),
     ('Hardcover book on history', 2, 'Books'),
     ('Organic green tea', 3, 'Groceries'),
