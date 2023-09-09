@@ -4,7 +4,50 @@
 
 FROM ubuntu:22.04 as base
 
+# Declare all the build arguments and set them to
+# environment variables for use in build and runtime
 ARG PG_VERSION_MAJOR
+ARG PG_BM25_VERSION
+ARG PG_CRON_VERSION
+ARG PG_NET_VERSION
+ARG PG_IVM_VERSION
+ARG PG_GRAPHQL_VERSION
+ARG PG_HASHIDS_VERSION
+ARG PG_JSONSCHEMA_VERSION
+ARG PG_REPACK_VERSION
+ARG PG_STAT_MONITOR_VERSION
+ARG PG_HINT_PLAN_VERSION
+ARG PGML_VERSION
+ARG PGTAP_VERSION
+ARG PGVECTOR_VERSION
+ARG PGAUDIT_VERSION
+ARG POSTGIS_VERSION
+ARG PGROUTING_VERSION
+ARG PGSQL_HTTP_VERSION
+ARG HYPOPG_VERSION
+ARG RUM_VERSION
+ARG CITUS_VERSION
+ENV PG_VERSION_MAJOR=${PG_VERSION_MAJOR}
+ENV PG_BM25_VERSION=${PG_BM25_VERSION}
+ENV PG_CRON_VERSION=${PG_CRON_VERSION}
+ENV PG_NET_VERSION=${PG_NET_VERSION}
+ENV PG_IVM_VERSION=${PG_IVM_VERSION}
+ENV PG_GRAPHQL_VERSION=${PG_GRAPHQL_VERSION}
+ENV PG_HASHIDS_VERSION=${PG_HASHIDS_VERSION}
+ENV PG_JSONSCHEMA_VERSION=${PG_JSONSCHEMA_VERSION}
+ENV PG_REPACK_VERSION=${PG_REPACK_VERSION}
+ENV PG_STAT_MONITOR_VERSION=${PG_STAT_MONITOR_VERSION}
+ENV PG_HINT_PLAN_VERSION=${PG_HINT_PLAN_VERSION}
+ENV PGML_VERSION=${PGML_VERSION}
+ENV PGTAP_VERSION=${PGTAP_VERSION}
+ENV PGVECTOR_VERSION=${PGVECTOR_VERSION}
+ENV PGAUDIT_VERSION=${PGAUDIT_VERSION}
+ENV POSTGIS_VERSION=${POSTGIS_VERSION}
+ENV PGROUTING_VERSION=${PGROUTING_VERSION}
+ENV PGSQL_HTTP_VERSION=${PGSQL_HTTP_VERSION}
+ENV HYPOPG_VERSION=${HYPOPG_VERSION}
+ENV RUM_VERSION=${RUM_VERSION}
+ENV CITUS_VERSION=${CITUS_VERSION}
 
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
@@ -44,8 +87,6 @@ RUN apt-get update && apt-fast install -y --no-install-recommends \
 
 FROM base as builder
 
-ARG PG_VERSION_MAJOR
-
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 
 # Install build dependencies
@@ -73,9 +114,6 @@ RUN cargo install cargo-pgrx --version 0.9.8
 
 FROM builder as builder-pg_bm25
 
-ARG PG_VERSION_MAJOR
-ARG PG_BM25_VERSION
-
 WORKDIR /usr/src/app
 
 COPY pg_bm25/ /usr/src/app
@@ -83,8 +121,8 @@ COPY pg_bm25/ /usr/src/app
 # Use the build argument to update the version in Cargo.toml
 RUN sed -i "s/version = \"[0-9]*\.[0-9]*\.[0-9]*\"/version = \"${PG_BM25_VERSION}\"/" Cargo.toml
 
-RUN cargo pgrx init --pg${PG_VERSION_MAJOR}=/usr/lib/postgresql/${PG_VERSION_MAJOR}/bin/pg_config && \
-    cargo pgrx package --pg-config /usr/lib/postgresql/${PG_VERSION_MAJOR}/bin/pg_config
+RUN cargo pgrx init "--pg${PG_VERSION_MAJOR}=/usr/lib/postgresql/${PG_VERSION_MAJOR}/bin/pg_config" && \
+    cargo pgrx package --pg-config "/usr/lib/postgresql/${PG_VERSION_MAJOR}/bin/pg_config"
 
 ######################
 # Other extensions
@@ -92,25 +130,6 @@ RUN cargo pgrx init --pg${PG_VERSION_MAJOR}=/usr/lib/postgresql/${PG_VERSION_MAJ
 
 FROM builder as builder-generic
 
-ARG PG_VERSION_MAJOR
-ARG PG_CRON_VERSION
-ARG PG_NET_VERSION
-ARG PG_IVM_VERSION
-ARG PG_GRAPHQL_VERSION
-ARG PG_HASHIDS_VERSION
-ARG PG_JSONSCHEMA_VERSION
-ARG PG_REPACK_VERSION
-ARG PG_STAT_MONITOR_VERSION
-ARG PG_HINT_PLAN_VERSION
-ARG PGTAP_VERSION
-ARG PGVECTOR_VERSION
-ARG PGAUDIT_VERSION
-ARG POSTGIS_VERSION
-ARG PGROUTING_VERSION
-ARG PGSQL_HTTP_VERSION
-ARG HYPOPG_VERSION
-ARG RUM_VERSION
-ARG CITUS_VERSION
 ARG TARGETARCH
 
 ENV USE_PGXS=1
@@ -171,9 +190,6 @@ ADD "https://github.com/supabase/pg_jsonschema/releases/download/v${PG_JSONSCHEM
 
 FROM builder as builder-pgml
 
-ARG PG_VERSION_MAJOR
-ARG PGML_VERSION
-
 RUN apt-get update && apt-fast install -y --no-install-recommends \
     libssl-dev \
     bison \
@@ -191,19 +207,17 @@ WORKDIR /tmp/postgresml/pgml-extension
 
 RUN git submodule update --init --recursive && \
     git fetch --tags && \
-    git fetch --depth 1 origin tag v${PGML_VERSION} && \
-    git checkout v${PGML_VERSION}
+    git fetch --depth 1 origin tag "v${PGML_VERSION}" && \
+    git checkout "v${PGML_VERSION}"
 
-RUN cargo pgrx init --pg${PG_VERSION_MAJOR}=/usr/lib/postgresql/${PG_VERSION_MAJOR}/bin/pg_config && \
-    cargo pgrx package --pg-config /usr/lib/postgresql/${PG_VERSION_MAJOR}/bin/pg_config
+RUN cargo pgrx init "--pg${PG_VERSION_MAJOR}=/usr/lib/postgresql/${PG_VERSION_MAJOR}/bin/pg_config" && \
+    cargo pgrx package --pg-config "/usr/lib/postgresql/${PG_VERSION_MAJOR}/bin/pg_config"
 
 ###############################################
 # Third Stage: PostgreSQL
 ###############################################
 
 FROM base as paradedb
-
-ARG PG_VERSION_MAJOR
 
 WORKDIR /usr/src/app
 
@@ -217,7 +231,7 @@ RUN apt-get update && apt-fast install -y --no-install-recommends \
     libprotobuf-c1 \
     && rm -rf /var/lib/apt/lists/* /tmp/*
 
-# # Copy the pg_bm25 & pgml extensions from their builder stages
+# Copy the pg_bm25 & pgml extensions from their builder stages
 COPY --from=builder-pg_bm25 /usr/src/app/target/release/pg_bm25-pg${PG_VERSION_MAJOR}/usr/share/postgresql/${PG_VERSION_MAJOR}/extension/* /usr/share/postgresql/${PG_VERSION_MAJOR}/extension/
 COPY --from=builder-pg_bm25 /usr/src/app/target/release/pg_bm25-pg${PG_VERSION_MAJOR}/usr/lib/postgresql/${PG_VERSION_MAJOR}/lib/* /usr/lib/postgresql/${PG_VERSION_MAJOR}/lib/
 COPY --from=builder-pgml /tmp/postgresml/pgml-extension/target/release/pgml-pg${PG_VERSION_MAJOR}/usr/share/postgresql/${PG_VERSION_MAJOR}/extension/* /usr/share/postgresql/${PG_VERSION_MAJOR}/extension/
