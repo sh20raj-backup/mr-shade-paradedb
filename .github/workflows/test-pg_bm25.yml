@@ -1,6 +1,6 @@
 # workflows/test-pg_bm25.yml
 #
-# pg_bm25: Unit Tests
+# pg_bm25: Tests
 # Run unit and packaging tests for the pg_bm25 extension.
 
 name: Testing
@@ -60,7 +60,7 @@ jobs:
           sudo chown -R $(whoami) /usr/share/postgresql/14/extension/ /usr/lib/postgresql/14/lib/
           sudo chown -R $(whoami) /usr/share/postgresql/15/extension/ /usr/lib/postgresql/15/lib/
 
-          # Add PostgreSQL binaries to the PATH for regression tests
+          # Add PostgreSQL binaries to the PATH for integration tests
           echo "/usr/lib/postgresql/11/bin" >> $GITHUB_PATH
           echo "/usr/lib/postgresql/12/bin" >> $GITHUB_PATH
           echo "/usr/lib/postgresql/13/bin" >> $GITHUB_PATH
@@ -100,10 +100,10 @@ jobs:
           export RUST_BACKTRACE=1
           cargo pgrx test
 
-      - name: Run pg_bm25 Regression Tests
+      - name: Run pg_bm25 Integration Tests
         working-directory: pg_bm25
         run: |
-          # Install the extension on the runner & run regression tests
+          # Install the extension on the runner & run integration tests
           cargo pgrx install
           ./test/runtests.sh
 

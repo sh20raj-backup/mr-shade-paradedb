@@ -1,6 +1,7 @@
 <h1 align="center">
-  <img src="../docs/logo/pg_bm25.svg" alt="pg_bm25" width="800px"></a>
+  <img src="../docs/logo/pg_bm25.svg" alt="pg_bm25" width="400px"></a>
 <br>
+</h1>
 
 [![Testing](https://github.com/paradedb/paradedb/actions/workflows/test-pg_bm25.yml/badge.svg)](https://github.com/paradedb/paradedb/actions/workflows/test-pg_bm25.yml)
 [![codecov](https://codecov.io/gh/getretake/paradedb/graph/badge.svg?token=PHV8CAMHNQ)](https://codecov.io/gh/getretake/paradedb)
@@ -9,25 +10,27 @@
 
 `pg_bm25` is a PostgreSQL extension that enables full-text search
 using the Okapi BM25 algorithm, the state-of-the-art ranking function
-for full text search. It is built in Rust using `pgrx` and supported on PostgreSQL 11+.
+for full text search. It is built in Rust using `pgrx` and supported on PostgreSQL
+11+.
 
 ## Development
 
 ### Prerequisites
 
 Before developing the extension, ensure that you have Rust installed
-(version >1.70), ideally via `rustup`.
+(version >1.70), ideally via `rustup` (we've observed issues with installing Rust
+via Homebrew on macOS).
 
-### Running the Extension
-
-1. Install and initialize pgrx:
+Then, install and initialize pgrx:
 
 ```bash
 cargo install --locked cargo-pgrx
 cargo pgrx init
 ```
 
-2. Start pgrx:
+### Running the Extension
+
+First, start pgrx:
 
 ```bash
 cargo pgrx run
@@ -69,7 +72,7 @@ Execute a search query on your indexed table:
 ```sql
 SELECT *
 FROM mock_items
-WHERE mock_items @@@ 'description:keyboard OR category:electronics OR rating>2';
+WHERE mock_items @@@ 'description:keyboard OR category:electronics';
 ```
 
 ### Modifying the Extension
@@ -100,7 +103,14 @@ cargo pgrx test
 This will run all unit tests defined in `/src`. To add a new unit test, simply add
 tests inline in the relevant files, using the `#[cfg(test)]` attribute.
 
-To run the integration test suite, use the following command:
+To run the integration test suite, first install the extension on your system with:
+
+```bash
+cargo pgrx install
+```
+
+You'll need to run this command every time you make changes to the extension that
+you want reflected in the integration test suite. Then, run the tests with:
 
 ```bash
 ./test/runtests.sh
@@ -114,7 +124,7 @@ by the test suite.
 
 ## Packaging
 
-The extension gets packaged into our Docker image as part of the build process.
+The extension gets packaged into our Docker image(s) as part of the build process.
 If you want to package the extension locally, you can do so by running the
 following command:
 

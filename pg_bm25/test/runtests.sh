@@ -44,7 +44,7 @@ esac
 
 # Check that the pg_bm25 extension is installed on the test system
 if [[ ! -f "$CONTROL_FILE_PATH" ]]; then
-  echo "Error: The pg_bm25 PostgreSQL extension isn't installed. Please install the extension with cargo pgrx install and re-run this script."
+  echo "Error: The pg_bm25 PostgreSQL extension isn't installed. Please install the extension with 'cargo pgrx install' and re-run this script."
   exit 1
 fi
 
