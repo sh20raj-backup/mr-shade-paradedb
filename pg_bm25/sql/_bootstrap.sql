@@ -80,7 +80,7 @@ BEGIN
     EXECUTE 'SET client_min_messages TO ' || quote_literal(original_client_min_messages);
 END $$;
 
--- This create_bm25 function to dynamically create index and query functions.
+-- Use this create_bm25 function to dynamically create index and query functions.
 -- This call will create a new function called 'dynamicbm25', which can be used to query.
 -- Example:
 --
