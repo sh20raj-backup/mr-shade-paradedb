@@ -37,7 +37,7 @@ jobs:
       prior_matrix: ${{ steps.compute.outputs.prior_matrix }}
     steps:
       - name: Checkout Git Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0 # Fetch the entire history (required to read tags)
 
@@ -89,12 +89,12 @@ jobs:
 
     steps:
       - name: Checkout Git Repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0 # Fetch the entire history (required to checkout tags)
 
       - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v2
         with:
           cache: false
           rustflags: "" # Use .cargo/config.toml target-cpu flags
